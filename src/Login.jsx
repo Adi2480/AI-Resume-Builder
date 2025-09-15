@@ -1,64 +1,49 @@
 import React, {useState} from "react";
+import axios from "axios";
 
-function Login(){
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      alert("Login initiated");
+      const response = await axios.post("https://localhost:7050/api/auth/login", {
+        username,
+        password,
+      });
 
-        if(!email || ! password){
-            setError("Please enter valid email and password");
-            return;
-        }
-        setError("");
+      localStorage.setItem("token", response.data.token); // Save JWT token
+      alert("Login Successful!");
+    } catch (err) {
+      console.log(err);
+      setError("Invalid credentials");
+    }
+  };
 
-        fetch("http://localhost:5000/api/auth/login", {
-            method : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({email, password}),
-        })
-        .then((res) => {
-            if(!res){
-                throw new Error("Invalid credentials");
-            }
-            return res.json();
-        })
-        .then ((data) => {
-            localStorage.setItem("token", data.token);
-            alert("Login successfull");
-        })
-        .catch((err) => {
-            setError(err.message);
-        })
-    };
-
-    return (
-        <div style={styles.container}>
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit} style={styles.form}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={styles.input}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={styles.input}
-                />
-                {error && <p style={styles.error}>{error}</p>}
-                <button type="submit" style={styles.submit}>
-                    Login
-                </button>
-            </form>
-        </div>
-    );
+  return (
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        /><br/>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        /><br/>
+        <button type="submit">Login</button>
+      </form>
+      {error && <p style={{color:"red"}}>{error}</p>}
+    </div>
+  );
 }
 
 const styles = {
